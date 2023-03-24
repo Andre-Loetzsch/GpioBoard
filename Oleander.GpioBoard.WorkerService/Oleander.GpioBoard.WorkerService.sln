@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33516.290
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Oleander.GpioBoard.WorkerService", "src\Oleander.GpioBoard.WorkerService.csproj", "{83E17C50-C375-4601-BFDA-A66542429AAE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A5E76651-9CFF-409C-B0FF-DD704A8C3B42}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Oleander.GpioBoard", "..\Oleander.GpioBoard\src\Oleander.GpioBoard.csproj", "{D5BCD6C1-ACF2-4331-86CA-F7A936DE95D4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{83E17C50-C375-4601-BFDA-A66542429AAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83E17C50-C375-4601-BFDA-A66542429AAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83E17C50-C375-4601-BFDA-A66542429AAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83E17C50-C375-4601-BFDA-A66542429AAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5BCD6C1-ACF2-4331-86CA-F7A936DE95D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5BCD6C1-ACF2-4331-86CA-F7A936DE95D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5BCD6C1-ACF2-4331-86CA-F7A936DE95D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5BCD6C1-ACF2-4331-86CA-F7A936DE95D4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{83E17C50-C375-4601-BFDA-A66542429AAE} = {A5E76651-9CFF-409C-B0FF-DD704A8C3B42}
+		{D5BCD6C1-ACF2-4331-86CA-F7A936DE95D4} = {A5E76651-9CFF-409C-B0FF-DD704A8C3B42}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BD2A0804-418E-41B0-99D4-DFDFF939EBF5}
+	EndGlobalSection
+EndGlobal

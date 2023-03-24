@@ -1,0 +1,18 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <TargetFrameworks>net7.0</TargetFrameworks>
+    <Copyright>Copyright © Oleander 2023</Copyright>
+    <Product>Oleander Extensions</Product>
+    <Company>Oleander</Company>
+    <Nullable>enable</Nullable>
+
+    <git-repository Condition="Exists('$(SolutionDir)')">$([MSBuild]::GetDirectoryNameOfFileAbove($(SolutionDir), ".git\\HEAD"))</git-repository>
+    <targeDir>$(git-repository)\.targets</targeDir>
+  </PropertyGroup>
+
+  <Import Condition="$([System.IO.File]::Exists('$(targeDir)\git.targets'))" Project="$(targeDir)\git.targets"> </Import>
+  <Import Condition="$([System.IO.File]::Exists('$(targeDir)\version.targets'))" Project="$(targeDir)\version.targets"> </Import>
+  <Import Condition="$([System.IO.File]::Exists('$(targeDir)\generatePackage.targets'))" Project="$(targeDir)\generatePackage.targets"> </Import>
+
+</Project>

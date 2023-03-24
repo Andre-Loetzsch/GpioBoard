@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\.targets\common.targets" />
+
+
+  <ItemGroup>
+    <PackageReference Include="Oleander.Extensions.Logging.Abstractions" Version="1.0.23076.1407" />
+    <PackageReference Include="System.Device.Gpio" Version="2.2.0" />
+  </ItemGroup>
+
+</Project>
