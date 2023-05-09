@@ -1,14 +1,16 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Oleander.Extensions.Configuration;
+using Oleander.Extensions.Logging.Abstractions;
 using Oleander.Extensions.Logging.Providers;
 
 namespace Oleander.GpioBoard.WorkerService
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public  static async Task Main(string[] args)
         {
             var host = Host.CreateDefaultBuilder(args)
+                .UseSystemd()
                 .ConfigureServices(services =>
                 {
                     var serviceProvider = services.BuildServiceProvider();
@@ -29,7 +31,8 @@ namespace Oleander.GpioBoard.WorkerService
                         .Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider, LoggerSinkProvider>());
                 }).Build();
 
-            host.Run();
+            host.Services.InitLoggerFactory();
+            await host.RunAsync();
         }
     }
 }

@@ -5,7 +5,7 @@ namespace Oleander.GpioBoard.WorkerService
         private readonly ILogger<Worker> _logger;
         private readonly Board _board = new ();
 
-        public Worker(ILogger<Worker> logger)
+        public Worker(ILogger<Worker> logger, IHostApplicationLifetime lifetime)
         {
             this._logger = logger;
         }
@@ -15,7 +15,11 @@ namespace Oleander.GpioBoard.WorkerService
 
             await this._board.StartAsync();
 
-            stoppingToken.WaitHandle.WaitOne();
+            //stoppingToken.WaitHandle.WaitOne();
+            this._logger.LogInformation("Worker started async 2: {time}", DateTimeOffset.Now);
+
+
+            await Task.Delay(Timeout.Infinite, stoppingToken);
 
             await this._board.StopAsync();
 
