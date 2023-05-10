@@ -106,12 +106,6 @@ public class Board
                 this._controller.OpenPin(outPin17, PinMode.Output, PinValue.High);
 
 
-
-
-
-
-
-
                 this._inputPins.Add(this._inPin18.PinNumber, this._inPin18);
                 this._inputPins.Add(this._inPin19.PinNumber, this._inPin19);
                 this._inputPins.Add(this._inPin20.PinNumber, this._inPin20);
@@ -140,7 +134,7 @@ public class Board
                     };
 
                     this._controller.OpenPin(inputPins.PinNumber, PinMode.InputPullDown, PinValue.Low);
-                    this._controller.RegisterCallbackForPinValueChangedEvent(this._inPin18.PinNumber, PinEventTypes.Falling | PinEventTypes.Rising, this.OnPinEvent);
+                    this._controller.RegisterCallbackForPinValueChangedEvent(inputPins.PinNumber, PinEventTypes.Falling | PinEventTypes.Rising, this.OnPinEvent);
                 }
 
 
