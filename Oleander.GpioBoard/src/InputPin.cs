@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 
 namespace Oleander.GpioBoard;
 
 internal class InputPin : IDisposable
 {
+    private readonly ILogger _logger;
     public event Action<PinValueChangedEventArgs>? ValueChanged;
 
     private static readonly Dictionary<int, InputPin> inputPins = new();
@@ -14,10 +16,11 @@ internal class InputPin : IDisposable
 
     private bool _lastValue;
 
-    public InputPin(int pinNumber, string? name = null)
+    public InputPin(ILogger logger, int pinNumber, string? name = null)
     {
         if (pinNumber is < 18 or > 27)
             throw new ArgumentOutOfRangeException(nameof(pinNumber), pinNumber, "The PIN number must be between 18 and 27!");
+        this._logger = logger;
 
         this.PinNumber = pinNumber;
         this.Name = name ?? $"Pin {pinNumber}";
@@ -53,6 +56,8 @@ internal class InputPin : IDisposable
         if (this.PinNumber != args.PinNumber) return;
         if (this._lastValue && args.ChangeType == PinEventTypes.Rising) return;
 
+        this._logger.LogInformation("CallbackForPinValueChangedEvent: {PinNumber}", this.PinNumber);
+
         this.BounceTime = DateTime.Now.Add(this.BounceTimeSpan);
         this._lastValue = args.ChangeType == PinEventTypes.Rising;
     }
@@ -61,6 +66,8 @@ internal class InputPin : IDisposable
     {
         if (this.Value == this._lastValue) return;
         if ((DateTime.Now - this.BounceTime).TotalMicroseconds < 1) return;
+
+        Console.WriteLine($"PublishValue: {this.Value} -> {this._lastValue}");
 
         this.Value = this._lastValue;
         this.ValueChanged?.Invoke(new(this.Value ? PinEventTypes.Rising : PinEventTypes.Falling, this.PinNumber));

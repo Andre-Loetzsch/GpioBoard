@@ -31,21 +31,21 @@ public class Board
     private const int outPin17 = 17;
 
 
-    private readonly InputPin _inPin18 = new(18);
-    private readonly InputPin _inPin19 = new(19);
-    private readonly InputPin _inPin20 = new(20);
-    private readonly InputPin _inPin21 = new(21);
-    private readonly InputPin _inPin22 = new(22);
-    private readonly InputPin _inPin23 = new(23);
-    private readonly InputPin _inPin24 = new(24);
-    private readonly InputPin _inPin25 = new(25);
-    private readonly InputPin _inPin26 = new(26);
-    private readonly InputPin _inPin27 = new(27);
+    private readonly InputPin _inPin18;
+    private readonly InputPin _inPin19;
+    private readonly InputPin _inPin20;
+    private readonly InputPin _inPin21;
+    private readonly InputPin _inPin22;
+    private readonly InputPin _inPin23;
+    private readonly InputPin _inPin24;
+    private readonly InputPin _inPin25;
+    private readonly InputPin _inPin26;
+    private readonly InputPin _inPin27;
 
 
     private readonly Dictionary<int, InputPin> _inputPins = new();
 
-    private string[] _inpstatus = new string[9];
+    private string[] _inpstatus = new string[10];
 
     private int _currentOutPin = 01;
 
@@ -63,6 +63,18 @@ public class Board
     public Board()
     {
         this.Logger = LoggerFactory.CreateLogger<Board>();
+
+        this._inPin18 = new InputPin(this.Logger, 18);
+        this._inPin19 = new InputPin(this.Logger, 19);
+        this._inPin20 = new InputPin(this.Logger, 20);
+        this._inPin21 = new InputPin(this.Logger, 21);
+        this._inPin22 = new InputPin(this.Logger, 22);
+        this._inPin23 = new InputPin(this.Logger, 23);
+        this._inPin24 = new InputPin(this.Logger, 24);
+        this._inPin25 = new InputPin(this.Logger, 25);
+        this._inPin26 = new InputPin(this.Logger, 26);
+        this._inPin27 = new InputPin(this.Logger, 27);
+
     }
 
     internal readonly ILogger Logger;
@@ -92,6 +104,13 @@ public class Board
                 this._controller.OpenPin(outPin15, PinMode.Output, PinValue.High);
                 this._controller.OpenPin(outPin16, PinMode.Output, PinValue.High);
                 this._controller.OpenPin(outPin17, PinMode.Output, PinValue.High);
+
+
+
+
+
+
+
 
                 this._inputPins.Add(this._inPin18.PinNumber, this._inPin18);
                 this._inputPins.Add(this._inPin19.PinNumber, this._inPin19);
@@ -197,9 +216,11 @@ public class Board
             return;
         }
 
+        this.Logger.LogInformation("Pin {pin}, State={state}", args.PinNumber, args.ChangeType is PinEventTypes.Rising ? alert : ready);
+
         inputPin.CallbackForPinValueChangedEvent(sender, args);
 
         File.AppendAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RawInputs"), 
-            $"{DateTime.Now:yyyy.MM.dd HH:mm:ss fff}{args.PinNumber}:{args.ChangeType}{Environment.NewLine}");
+            $"{DateTime.Now:yyyy.MM.dd HH:mm:ss fff}:{args.PinNumber}:{args.ChangeType}{Environment.NewLine}");
     }
 }
