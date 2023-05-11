@@ -14,6 +14,7 @@ internal class InputPin : IDisposable
     private static readonly Dictionary<int, InputPin> inputPins = new();
     private static Timer? timer;
 
+    private List<int> _pinChanges = new ();
     private bool _lastValue;
 
     public InputPin(ILogger logger, int pinNumber, string? name = null)
@@ -54,6 +55,9 @@ internal class InputPin : IDisposable
     public void CallbackForPinValueChangedEvent(object sender, PinValueChangedEventArgs args)
     {
         if (this.PinNumber != args.PinNumber) return;
+
+        this._pinChanges.Add(args.ChangeType == PinEventTypes.Rising ? 1 : 0);
+
         if (this._lastValue && args.ChangeType == PinEventTypes.Rising) return;
 
         this._logger.LogInformation("CallbackForPinValueChangedEvent: {PinNumber}", this.PinNumber);
@@ -66,9 +70,10 @@ internal class InputPin : IDisposable
     {
         if (this.Value == this._lastValue) return;
         if ((DateTime.Now - this.BounceTime).TotalMicroseconds < 1) return;
+        
+        this._logger.LogInformation("PublishValue: {value} -> {lastValue} {pinChanges}", this.Value, this._lastValue, string.Join(":", this._pinChanges));
 
-        Console.WriteLine($"PublishValue: {this.Value} -> {this._lastValue}");
-
+        this._pinChanges.Clear();
         this.Value = this._lastValue;
         this.ValueChanged?.Invoke(new(this.Value ? PinEventTypes.Rising : PinEventTypes.Falling, this.PinNumber));
     }

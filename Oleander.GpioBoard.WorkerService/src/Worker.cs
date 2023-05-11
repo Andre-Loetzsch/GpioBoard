@@ -16,12 +16,15 @@ namespace Oleander.GpioBoard.WorkerService
             await this._board.StartAsync();
 
             //stoppingToken.WaitHandle.WaitOne();
-            this._logger.LogInformation("Worker started async 2: {time}", DateTimeOffset.Now);
+            this._logger.LogInformation("Worker started async: {time}", DateTimeOffset.Now);
 
 
             await Task.Delay(Timeout.Infinite, stoppingToken);
 
             await this._board.StopAsync();
+
+            this._logger.LogInformation("Worker stopped async: {time}", DateTimeOffset.Now);
+
 
             //while (!stoppingToken.IsCancellationRequested)
             //{
@@ -30,6 +33,6 @@ namespace Oleander.GpioBoard.WorkerService
             //}
         }
 
-       
+
     }
 }
