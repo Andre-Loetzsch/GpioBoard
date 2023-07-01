@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
+using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.Logging;
+using Oleander.Extensions.Logging.Abstractions;
 
 namespace Oleander.GpioBoard;
 
@@ -14,7 +16,7 @@ internal class InputPin : IDisposable
     private static readonly Dictionary<int, InputPin> inputPins = new();
     private static Timer? timer;
 
-    private List<int> _pinChanges = new ();
+    private readonly List<int> _pinChanges = new();
     private bool _lastValue;
 
     public InputPin(ILogger logger, int pinNumber, string? name = null)
@@ -35,7 +37,14 @@ internal class InputPin : IDisposable
         {
             foreach (var inputPin in inputPins.Values)
             {
-                inputPin.PublishValue();
+                try
+                {
+                    inputPin.PublishValue();
+                }
+                catch (Exception ex)
+                {
+                    this._logger.LogError("PublishValue caused an exception! {ex}", ex.GetAllMessages());
+                }
             }
 
         }, null, TimeSpan.FromMilliseconds(100), TimeSpan.FromMilliseconds(100));
@@ -56,11 +65,14 @@ internal class InputPin : IDisposable
     {
         if (this.PinNumber != args.PinNumber) return;
 
-        this._pinChanges.Add(args.ChangeType == PinEventTypes.Rising ? 1 : 0);
+        lock (this._pinChanges)
+        {
+            this._pinChanges.Add(args.ChangeType == PinEventTypes.Rising ? 1 : 0);
+        }
 
         if (this._lastValue && args.ChangeType == PinEventTypes.Rising) return;
 
-        this._logger.LogInformation("CallbackForPinValueChangedEvent: {PinNumber}", this.PinNumber);
+        //this._logger.LogInformation("CallbackForPinValueChangedEvent: {PinNumber}", this.PinNumber);
 
         this.BounceTime = DateTime.Now.Add(this.BounceTimeSpan);
         this._lastValue = args.ChangeType == PinEventTypes.Rising;
@@ -70,10 +82,16 @@ internal class InputPin : IDisposable
     {
         if (this.Value == this._lastValue) return;
         if ((DateTime.Now - this.BounceTime).TotalMicroseconds < 1) return;
-        
-        this._logger.LogInformation("PublishValue: {value} -> {lastValue} {pinChanges}", this.Value, this._lastValue, string.Join(":", this._pinChanges));
 
-        this._pinChanges.Clear();
+        lock (this._pinChanges)
+        {
+            var pinChangedList = this._pinChanges.ToList();
+            this._logger.LogInformation("Pin={pin}, PublishValue={value} -> {lastValue} {pinChanges}", this.PinNumber,
+                this.Value, this._lastValue, string.Join(":", pinChangedList));
+
+            this._pinChanges.Clear();
+        }
+
         this.Value = this._lastValue;
         this.ValueChanged?.Invoke(new(this.Value ? PinEventTypes.Rising : PinEventTypes.Falling, this.PinNumber));
     }
@@ -100,4 +118,4 @@ internal class InputPin : IDisposable
     }
 
     #endregion
-}
+} 

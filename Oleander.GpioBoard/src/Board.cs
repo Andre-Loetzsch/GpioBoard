@@ -65,15 +65,15 @@ public class Board
         this.Logger = LoggerFactory.CreateLogger<Board>();
 
         this._inPin18 = new InputPin(this.Logger, 18);
-        this._inPin19 = new InputPin(this.Logger, 19);
-        this._inPin20 = new InputPin(this.Logger, 20);
-        this._inPin21 = new InputPin(this.Logger, 21);
-        this._inPin22 = new InputPin(this.Logger, 22);
-        this._inPin23 = new InputPin(this.Logger, 23);
-        this._inPin24 = new InputPin(this.Logger, 24);
-        this._inPin25 = new InputPin(this.Logger, 25);
-        this._inPin26 = new InputPin(this.Logger, 26);
-        this._inPin27 = new InputPin(this.Logger, 27);
+        this._inPin19 = new InputPin(this.Logger, 19); // rot
+        this._inPin20 = new InputPin(this.Logger, 20); // ws
+        this._inPin21 = new InputPin(this.Logger, 21); // ge
+        this._inPin22 = new InputPin(this.Logger, 22); // ws
+        this._inPin23 = new InputPin(this.Logger, 23); // gn
+        this._inPin24 = new InputPin(this.Logger, 24); // ws
+        this._inPin25 = new InputPin(this.Logger, 25); // br
+        this._inPin26 = new InputPin(this.Logger, 26); // rt
+        this._inPin27 = new InputPin(this.Logger, 27); // sw
 
     }
 
@@ -85,8 +85,8 @@ public class Board
         {
             try
             {
-                var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RawInputs");
-                if (File.Exists(path)) File.Delete(path);
+
+                File.WriteAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RawInputs"), "");
 
                 this._controller.OpenPin(outPin02, PinMode.Output, PinValue.High);
                 this._controller.OpenPin(outPin03, PinMode.Output, PinValue.High);
@@ -133,40 +133,57 @@ public class Board
                         this._lastInPin = args.PinNumber;
                     };
 
-                    this._controller.OpenPin(inputPins.PinNumber, PinMode.InputPullDown, PinValue.Low);
-                    this._controller.RegisterCallbackForPinValueChangedEvent(inputPins.PinNumber, PinEventTypes.Falling | PinEventTypes.Rising, this.OnPinEvent);
+                    if (inputPins.PinNumber == 19)
+                    {
+                        this._controller.OpenPin(inputPins.PinNumber, PinMode.Input, PinValue.Low);
+                    }
+                    else
+                    {
+                        this._controller.OpenPin(inputPins.PinNumber, PinMode.InputPullDown, PinValue.Low);
+                    }
+
+                    this._controller.RegisterCallbackForPinValueChangedEvent(inputPins.PinNumber,
+                            PinEventTypes.Falling | PinEventTypes.Rising, this.OnPinEvent);
+                    
                 }
 
 
                 this._puseTimer = new Timer(state =>
                 {
-                    this._pulseValue = !this._pulseValue;
-
-                    if (this._inPinCounter != 0)
+                    try
                     {
-                        if (this._inPinCounter > 10)
+                        this._pulseValue = !this._pulseValue;
+
+                        if (this._inPinCounter != 0)
                         {
-                            this.Logger.LogInformation("inPinCounter={count}", this._inPinCounter);
+                            if (this._inPinCounter > 10)
+                            {
+                                this.Logger.LogInformation("inPinCounter={count}", this._inPinCounter);
+                            }
+
+                            this._inPinCounter = 0;
                         }
 
-                        this._inPinCounter = 0;
-                    }
+                        if (this._currentOutPin < 2)
+                        {
+                            this._controller.Write(17, PinValue.High);
+                        }
+                        else
+                        {
+                            this._controller.Write(this._currentOutPin, PinValue.High);
+                        }
 
-                    if (this._currentOutPin < 2)
-                    {
-                        this._controller.Write(17, PinValue.High);
-                    }
-                    else
-                    {
-                        this._controller.Write(this._currentOutPin, PinValue.High);
-                    }
+                        this._currentOutPin++;
+                        this._controller.Write(this._currentOutPin, PinValue.Low);
 
-                    this._currentOutPin++;
-                    this._controller.Write(this._currentOutPin, PinValue.Low);
-
-                    if (this._currentOutPin > 16)
+                        if (this._currentOutPin > 16)
+                        {
+                            this._currentOutPin = 1;
+                        }
+                    }
+                    catch (Exception ex)
                     {
-                        this._currentOutPin = 1;
+                        this.Logger.LogError("useTimer caused an exception! {ex}", ex.GetAllMessages());
                     }
 
 
@@ -210,11 +227,18 @@ public class Board
             return;
         }
 
-        this.Logger.LogInformation("Pin {pin}, State={state}", args.PinNumber, args.ChangeType is PinEventTypes.Rising ? alert : ready);
+        //this.Logger.LogInformation("Pin {pin}, State={state}", args.PinNumber, args.ChangeType is PinEventTypes.Rising ? alert : ready);
 
-        inputPin.CallbackForPinValueChangedEvent(sender, args);
+        try
+        {
+            inputPin.CallbackForPinValueChangedEvent(sender, args);
 
-        File.AppendAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RawInputs"), 
-            $"{DateTime.Now:yyyy.MM.dd HH:mm:ss fff}:{args.PinNumber}:{args.ChangeType}{Environment.NewLine}");
+            File.AppendAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RawInputs"),
+                $"{DateTime.Now:yyyy.MM.dd HH:mm:ss fff}:{args.PinNumber}:{args.ChangeType}{Environment.NewLine}");
+        }
+        catch (Exception ex)
+        {
+            this.Logger.LogError("OnPinEvent caused an exception! {ex}", ex.GetAllMessages());
+        }
     }
 }
