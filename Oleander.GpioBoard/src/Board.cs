@@ -34,7 +34,7 @@ public class Board
     private readonly InputPin _inPin18;
     private readonly InputPin _inPin19;
     private readonly InputPin _inPin20;
-    private readonly InputPin _inPin21;
+    private readonly InputPin _inPin21; //Klo Taster
     private readonly InputPin _inPin22;
     private readonly InputPin _inPin23;
     private readonly InputPin _inPin24;
@@ -117,6 +117,19 @@ public class Board
                 this._inputPins.Add(this._inPin26.PinNumber, this._inPin26);
                 this._inputPins.Add(this._inPin27.PinNumber, this._inPin27);
 
+                this._inPin20.ValueChanged += args =>
+                {
+                    // Trafo 26V~
+                    this._controller.Write(outPin06, args.ChangeType == PinEventTypes.Rising ? PinValue.High : PinValue.Low);
+                };
+
+                this._inPin21.ValueChanged += args =>
+                {
+                    // Lüftunsklappe WC
+                    this._controller.Write(outPin02, args.ChangeType == PinEventTypes.Rising ? PinValue.High : PinValue.Low);
+                };
+
+
                 foreach (var inputPins in this._inputPins.Values)
                 {
                     this._inpstatus[inputPins.PinNumber - 18] = string.Empty;
@@ -133,61 +146,53 @@ public class Board
                         this._lastInPin = args.PinNumber;
                     };
 
-                    if (inputPins.PinNumber == 19)
-                    {
-                        this._controller.OpenPin(inputPins.PinNumber, PinMode.Input, PinValue.Low);
-                    }
-                    else
-                    {
-                        this._controller.OpenPin(inputPins.PinNumber, PinMode.InputPullDown, PinValue.Low);
-                    }
-
+                    this._controller.OpenPin(inputPins.PinNumber, PinMode.InputPullDown, PinValue.Low);
                     this._controller.RegisterCallbackForPinValueChangedEvent(inputPins.PinNumber,
                             PinEventTypes.Falling | PinEventTypes.Rising, this.OnPinEvent);
                     
                 }
 
 
-                this._puseTimer = new Timer(state =>
-                {
-                    try
-                    {
-                        this._pulseValue = !this._pulseValue;
+                //this._puseTimer = new Timer(state =>
+                //{
+                //    try
+                //    {
+                //        this._pulseValue = !this._pulseValue;
 
-                        if (this._inPinCounter != 0)
-                        {
-                            if (this._inPinCounter > 10)
-                            {
-                                this.Logger.LogInformation("inPinCounter={count}", this._inPinCounter);
-                            }
+                //        if (this._inPinCounter != 0)
+                //        {
+                //            if (this._inPinCounter > 10)
+                //            {
+                //                this.Logger.LogInformation("inPinCounter={count}", this._inPinCounter);
+                //            }
 
-                            this._inPinCounter = 0;
-                        }
+                //            this._inPinCounter = 0;
+                //        }
 
-                        if (this._currentOutPin < 2)
-                        {
-                            this._controller.Write(17, PinValue.High);
-                        }
-                        else
-                        {
-                            this._controller.Write(this._currentOutPin, PinValue.High);
-                        }
+                //        if (this._currentOutPin < 2)
+                //        {
+                //            this._controller.Write(17, PinValue.High);
+                //        }
+                //        else
+                //        {
+                //            this._controller.Write(this._currentOutPin, PinValue.High);
+                //        }
 
-                        this._currentOutPin++;
-                        this._controller.Write(this._currentOutPin, PinValue.Low);
+                //        this._currentOutPin++;
+                //        this._controller.Write(this._currentOutPin, PinValue.Low);
 
-                        if (this._currentOutPin > 16)
-                        {
-                            this._currentOutPin = 1;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        this.Logger.LogError("useTimer caused an exception! {ex}", ex.GetAllMessages());
-                    }
+                //        if (this._currentOutPin > 16)
+                //        {
+                //            this._currentOutPin = 1;
+                //        }
+                //    }
+                //    catch (Exception ex)
+                //    {
+                //        this.Logger.LogError("useTimer caused an exception! {ex}", ex.GetAllMessages());
+                //    }
 
 
-                }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+                //}, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
 
             }
             catch (Exception ex)
