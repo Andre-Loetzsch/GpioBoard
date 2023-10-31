@@ -121,8 +121,11 @@ public class Board
                 // LS WC
                 this._inPin20.ValueChanged += args =>
                 {
-                    // Dusche
+                    // Dusche ein?
                     if (this._controller.Read(this._inPin27.PinNumber) == PinValue.High) return;
+                    // WC-Tür offen?
+                    if (this._controller.Read(this._inPin23.PinNumber) == PinValue.Low) return;
+
                     // LK WC
                     //this._controller.Write(outPin06, args.ChangeType == PinEventTypes.Rising ? PinValue.High : PinValue.Low);
 
@@ -137,14 +140,20 @@ public class Board
                         this._controller.Write(outPin03, PinValue.Low);
 
                         // LK Boden / Keller
-                        this._controller.Write(outPin11, PinValue.Low);
+                        this._controller.Write(outPin10, PinValue.Low);
 
                         // WC-Beckern
-                        this._controller.Write(outPin10,  PinValue.High);
+                        this._controller.Write(outPin11,  PinValue.High);
 
-                        // LK WC ??
-                        this._controller.Write(outPin06, PinValue.High);
+                        // LK WC Zu
+                        this._controller.Write(outPin06, PinValue.Low);
                     }
+                    else
+                    {
+                        // LK WC ??
+                        //this._controller.Write(outPin06, PinValue.High);
+                    }
+
                     //this._controller.Write(outPin04, args.ChangeType == PinEventTypes.Rising ? PinValue.High : PinValue.Low);
 
                 };
@@ -162,19 +171,20 @@ public class Board
                     // LS WC
                     if (this._controller.Read(this._inPin20.PinNumber) == PinValue.High) return;
 
-                    this._controller.Write(outPin03, args.ChangeType == PinEventTypes.Rising ? PinValue.High : PinValue.Low);
+                    // Lüfter
+                    this._controller.Write(outPin03, args.ChangeType == PinEventTypes.Rising ? PinValue.Low : PinValue.High);
 
                     if (args.ChangeType == PinEventTypes.Rising)
                     {
 
                         // LK Boden / Keller
-                        this._controller.Write(outPin11, PinValue.High);
+                        this._controller.Write(outPin10, PinValue.High);
 
                         // WC-Beckern
-                        this._controller.Write(outPin10, PinValue.Low);
+                        this._controller.Write(outPin11, PinValue.Low);
 
-                        // LK WC ??
-                        this._controller.Write(outPin06, PinValue.High);
+                        // LK WC zu
+                        this._controller.Write(outPin06, PinValue.Low);
                     }
                 };
 
