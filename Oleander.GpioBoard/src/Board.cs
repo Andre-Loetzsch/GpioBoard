@@ -117,17 +117,86 @@ public class Board
                 this._inputPins.Add(this._inPin26.PinNumber, this._inPin26);
                 this._inputPins.Add(this._inPin27.PinNumber, this._inPin27);
 
+
+                // LS WC
                 this._inPin20.ValueChanged += args =>
                 {
-                    // Trafo 26V~
-                    this._controller.Write(outPin06, args.ChangeType == PinEventTypes.Rising ? PinValue.High : PinValue.Low);
+                    // Dusche
+                    if (this._controller.Read(this._inPin27.PinNumber) == PinValue.High) return;
+                    // LK WC
+                    //this._controller.Write(outPin06, args.ChangeType == PinEventTypes.Rising ? PinValue.High : PinValue.Low);
+
+                    // LK Boden
+                    //this._controller.Write(outPin07, args.ChangeType == PinEventTypes.Rising ? PinValue.High : PinValue.Low);
+
+
+                    // Lüfter ein
+                    if (args.ChangeType == PinEventTypes.Rising)
+                    {
+                        // Lüfter ein
+                        this._controller.Write(outPin03, PinValue.Low);
+
+                        // LK Boden / Keller
+                        this._controller.Write(outPin11, PinValue.Low);
+
+                        // WC-Beckern
+                        this._controller.Write(outPin10,  PinValue.High);
+
+                        // LK WC ??
+                        this._controller.Write(outPin06, PinValue.High);
+                    }
+                    //this._controller.Write(outPin04, args.ChangeType == PinEventTypes.Rising ? PinValue.High : PinValue.Low);
+
                 };
 
+                // Klo-Tür
+                this._inPin23.ValueChanged += args =>
+                {
+                    // Lüfter aus
+                    this._controller.Write(outPin03, PinValue.High);
+                };
+
+                // Dusche
+                this._inPin27.ValueChanged += args =>
+                {
+                    // LS WC
+                    if (this._controller.Read(this._inPin20.PinNumber) == PinValue.High) return;
+
+                    this._controller.Write(outPin03, args.ChangeType == PinEventTypes.Rising ? PinValue.High : PinValue.Low);
+
+                    if (args.ChangeType == PinEventTypes.Rising)
+                    {
+
+                        // LK Boden / Keller
+                        this._controller.Write(outPin11, PinValue.High);
+
+                        // WC-Beckern
+                        this._controller.Write(outPin10, PinValue.Low);
+
+                        // LK WC ??
+                        this._controller.Write(outPin06, PinValue.High);
+                    }
+                };
+
+
+
+
+
+
+                // Taster
                 this._inPin21.ValueChanged += args =>
                 {
-                    // Lüftunsklappe WC
+                    // Trafo 26V~
                     this._controller.Write(outPin02, args.ChangeType == PinEventTypes.Rising ? PinValue.High : PinValue.Low);
+
+                    //// Lüfter
+                    //this._controller.Write(outPin03, args.ChangeType == PinEventTypes.Rising ? PinValue.Low : PinValue.High);
+                    //this._controller.Write(outPin04, args.ChangeType == PinEventTypes.Rising ? PinValue.High : PinValue.Low);
                 };
+
+
+
+
 
 
                 foreach (var inputPins in this._inputPins.Values)
