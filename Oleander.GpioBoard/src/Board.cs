@@ -59,10 +59,13 @@ public class Board
     private bool _pulseValue;
 
     private readonly GpioController _controller = new();
+    private readonly GasConsumptionReport _gasConsumptionReport;
 
     public Board()
     {
         this.Logger = LoggerFactory.CreateLogger<Board>();
+
+        this._gasConsumptionReport = new(this.Logger,  Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "reports"));
 
         this._inPin18 = new InputPin(this.Logger, 18);
         this._inPin19 = new InputPin(this.Logger, 19); // rot
@@ -147,6 +150,9 @@ public class Board
 
                         // LK WC Zu
                         this._controller.Write(outPin06, PinValue.Low);
+                        // 26V an
+                        this._controller.Write(outPin02, PinValue.Low);
+
                     }
                     else
                     {
@@ -163,6 +169,9 @@ public class Board
                 {
                     // Lüfter aus
                     this._controller.Write(outPin03, PinValue.High);
+
+                    // 26V aus
+                    this._controller.Write(outPin02, PinValue.High);
                 };
 
                 // Dusche
@@ -173,6 +182,8 @@ public class Board
 
                     // Lüfter
                     this._controller.Write(outPin03, args.ChangeType == PinEventTypes.Rising ? PinValue.Low : PinValue.High);
+                    // 26V an/aus
+                    this._controller.Write(outPin02, args.ChangeType == PinEventTypes.Rising ? PinValue.Low : PinValue.High);
 
                     if (args.ChangeType == PinEventTypes.Rising)
                     {
@@ -188,11 +199,6 @@ public class Board
                     }
                 };
 
-
-
-
-
-
                 // Taster
                 this._inPin21.ValueChanged += args =>
                 {
@@ -204,10 +210,27 @@ public class Board
                     //this._controller.Write(outPin04, args.ChangeType == PinEventTypes.Rising ? PinValue.High : PinValue.Low);
                 };
 
+                // WC Spühung
+                this._inPin19.ValueChanged += args =>
+                {
+                    // Lüfter aus
+                    //this._controller.Write(outPin03, PinValue.High);
+                };
 
 
+                // Hauptgaszähler
+                this._inPin25.ValueChanged += args =>
+                {
+                    if (args.ChangeType == PinEventTypes.Falling) return;
+                    this._gasConsumptionReport.IncreaseMainGasMeter();
+                };
 
-
+                // Nebengaszähler
+                this._inPin26.ValueChanged += args =>
+                {
+                    if (args.ChangeType == PinEventTypes.Falling) return;
+                    this._gasConsumptionReport.IncreaseUnderGasMeter();
+                };
 
                 foreach (var inputPins in this._inputPins.Values)
                 {
