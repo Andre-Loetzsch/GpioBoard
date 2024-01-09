@@ -1,6 +1,6 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <TargetFrameworks>net7.0</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <Product>$(AssemblyName)</Product>
@@ -8,9 +8,8 @@
     <Copyright>Copyright © Oleander $([System.DateTime]::UtcNow.Year)</Copyright>
     <Company>Oleander</Company>
     <Product>$(AssemblyName)</Product>
-
     <GeneratePackageOnBuild Condition="$(IsPackable) != false AND $(MSBuildProjectDirectory.Contains('src'))">true"</GeneratePackageOnBuild>
-    <Description>Oleander extensions</Description>
+    <Description>$(AssemblyName)</Description>
     <PackageProjectUrl>https://nuget.pkg.github.com/Andre-Loetzsch/index.json</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Andre-Loetzsch/GpioBoard</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
