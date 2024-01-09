@@ -41,7 +41,7 @@ internal class GasConsumptionReport
 
     public long IncreaseMainGasMeter()
     {
-        this.MainMeterReading++;
+        this.MainMeterReading += 10;
 
         try
         {
@@ -49,7 +49,7 @@ internal class GasConsumptionReport
         }
         catch (Exception ex)
         {
-            this._logger.LogError("Exc: {exception}",  ex.GetAllMessages());
+            this._logger.LogError("Exc: {exception}", ex.GetAllMessages());
         }
 
         return this.MainMeterReading;
@@ -57,7 +57,7 @@ internal class GasConsumptionReport
 
     public long IncreaseUnderGasMeter()
     {
-        this.UnderMeterReading++;
+        this.UnderMeterReading += 10;
 
         try
         {
@@ -81,7 +81,7 @@ internal class GasConsumptionReport
 
             if (fileContent.Length > 0 && long.TryParse(fileContent[0], CultureInfo.InvariantCulture, out var value))
             {
-                this.MainMeterReading =  value;
+                this.MainMeterReading = value;
             }
 
             if (fileContent.Length > 1 && long.TryParse(fileContent[1], CultureInfo.InvariantCulture, out value))
@@ -112,7 +112,7 @@ internal class GasConsumptionReport
         fileName = Path.Combine(this._reportingDir, "cache");
 
         var reportCounters = new long[8];
-       
+
 
         if (File.Exists(fileName))
         {
@@ -166,10 +166,10 @@ internal class GasConsumptionReport
             }
             else
             {
-                reportCounters[0]++;
-                reportCounters[2]++;
-                reportCounters[4]++;
-                reportCounters[6]++;
+                reportCounters[0] += 10;
+                reportCounters[2] += 10;
+                reportCounters[4] += 10;
+                reportCounters[6] += 10;
                 diffMainTime = DateTime.Now - this._mainGasMeterIncreasedTime;
                 this._mainGasMeterIncreasedTime = DateTime.Now;
             }
@@ -178,21 +178,21 @@ internal class GasConsumptionReport
         {
             this._underGasMeterIncreased = true;
 
-            reportCounters[1]++;
-            reportCounters[3]++;
-            reportCounters[5]++;
-            reportCounters[7]++;
+            reportCounters[1] += 10;
+            reportCounters[3] += 10;
+            reportCounters[5] += 10;
+            reportCounters[7] += 10;
             diffUnderTime = DateTime.Now - this._underGasMeterIncreasedTime;
             this._underGasMeterIncreasedTime = DateTime.Now;
         }
 
         File.WriteAllLines(fileName, reportCounters.Select(x => x.ToString(CultureInfo.InvariantCulture)));
 
-        
+
         fileName = Path.Combine(this._reportingDir, $"hour_{DateTime.Now:yyyyMMdd}");
         var fileContent1 = File.Exists(fileName) ? File.ReadAllLines(fileName).ToList() : new List<string>();
 
-        while (fileContent1.Count < 24)
+        while (fileContent1.Count < 25)
         {
             fileContent1.Add("");
         }
@@ -204,7 +204,7 @@ internal class GasConsumptionReport
 
         fileContent1 = File.Exists(fileName) ? File.ReadAllLines(fileName).ToList() : new List<string>();
 
-        while (fileContent1.Count < 365)
+        while (fileContent1.Count < 366)
         {
             fileContent1.Add("");
         }
@@ -217,7 +217,7 @@ internal class GasConsumptionReport
 
         fileContent1 = File.Exists(fileName) ? File.ReadAllLines(fileName).ToList() : new List<string>();
 
-        while (fileContent1.Count < 12)
+        while (fileContent1.Count < 13)
         {
             fileContent1.Add("");
         }

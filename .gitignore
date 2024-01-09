@@ -360,5 +360,5 @@ MigrationBackup/
 # build and test out
 /out
 
-# version informations
-/.version
+# Versioning cache
+**/.[Vv]ersioning/[Cc]ache/

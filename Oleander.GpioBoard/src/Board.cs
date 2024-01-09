@@ -150,6 +150,7 @@ public class Board
 
                         // LK WC Zu
                         this._controller.Write(outPin06, PinValue.Low);
+
                         // 26V an
                         this._controller.Write(outPin02, PinValue.Low);
 
@@ -167,6 +168,9 @@ public class Board
                 // Klo-Tür
                 this._inPin23.ValueChanged += args =>
                 {
+                    // Dusche ein?
+                    if (this._controller.Read(this._inPin27.PinNumber) == PinValue.High) return;
+
                     // Lüfter aus
                     this._controller.Write(outPin03, PinValue.High);
 
@@ -196,6 +200,15 @@ public class Board
 
                         // LK WC zu
                         this._controller.Write(outPin06, PinValue.Low);
+
+                        // Dusche auf
+                        this._controller.Write(outPin12, PinValue.High);
+
+                        // Schlafzimmer zu
+                        this._controller.Write(outPin13, PinValue.Low);
+
+                        // Vorratskeller zu
+                        this._controller.Write(outPin14, PinValue.Low);
                     }
                 };
 
@@ -215,6 +228,9 @@ public class Board
                 {
                     // Lüfter aus
                     //this._controller.Write(outPin03, PinValue.High);
+
+                    // LK WC auf
+                    //this._controller.Write(outPin06, PinValue.High);
                 };
 
 
@@ -295,6 +311,41 @@ public class Board
 
 
                 //}, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
+
+
+                this._puseTimer = new Timer(state =>
+                {
+                    try
+                    {
+                        var fileName = Path.Combine(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "exec"));
+
+                        if (File.Exists(fileName))
+                        {
+
+                            foreach (var line in File.ReadAllLines(fileName))
+                            {
+                                // 2=true
+                                var command = line.Split('=', StringSplitOptions.RemoveEmptyEntries);
+
+                                if (command.Length < 2) continue;
+
+                                if (!int.TryParse(command[0], out var pin)) continue;
+                                if (!bool.TryParse(command[1], out var pinState)) continue;
+                                if (pin is < 2 or > 17) continue;
+
+                                this._controller.Write(pin, pinState ? PinValue.High : PinValue.Low);
+                            }
+                            
+                            File.Delete(fileName);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        this.Logger.LogError("useTimer caused an exception! {ex}", ex.GetAllMessages());
+                    }
+
+
+                }, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
 
             }
             catch (Exception ex)
