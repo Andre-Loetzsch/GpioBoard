@@ -6,8 +6,8 @@
     <Description>Oleander Oleander.GpioBoard</Description>
     <UserSecretsId>dotnet-Oleander.GpioBoard.WorkerService-c0c10f79-e89b-4c1f-8749-760be73cadb4</UserSecretsId>
     <ServerGarbageCollection>true</ServerGarbageCollection>
-    <AssemblyVersion>0.0.3.0</AssemblyVersion>
-    <SourceRevisionId>03a1930b92a4524c1ab505ded057ddf81e8c38ec</SourceRevisionId>
+    <AssemblyVersion>0.0.3.1</AssemblyVersion>
+    <SourceRevisionId>1cd1ba613ca579defd9e678a7e20516acfc9e5f2</SourceRevisionId>
     <VersionSuffix>alpha</VersionSuffix>
     <FileVersion>$(AssemblyVersion)</FileVersion>
     <Version Condition="'$(VersionSuffix)' != ''">$(AssemblyVersion)-$(VersionSuffix)</Version>
@@ -16,6 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Oleander.Assembly.Versioning.BuildTask" Version="0.0.56.0-dev" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="8.0.0" />
     <PackageReference Include="Oleander.Extensions.DependencyInjection" Version="1.1.23347.11357-dev" />

@@ -2,8 +2,8 @@
   <Import Project="..\..\Common\targets\common.targets" />
 
   <PropertyGroup>
-    <AssemblyVersion>0.0.3.0</AssemblyVersion>
-    <SourceRevisionId>03a1930b92a4524c1ab505ded057ddf81e8c38ec</SourceRevisionId>
+    <AssemblyVersion>0.0.3.1</AssemblyVersion>
+    <SourceRevisionId>1cd1ba613ca579defd9e678a7e20516acfc9e5f2</SourceRevisionId>
     <VersionSuffix>alpha</VersionSuffix>
     <FileVersion>$(AssemblyVersion)</FileVersion>
     <Version Condition="'$(VersionSuffix)' != ''">$(AssemblyVersion)-$(VersionSuffix)</Version>
@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Oleander.Assembly.Versioning.BuildTask" Version="0.0.56.0-dev" PrivateAssets="all" />
     <PackageReference Include="Oleander.Extensions.Logging.Abstractions" Version="1.1.23347.11357-dev" />
     <PackageReference Include="System.Device.Gpio" Version="3.1.0" />
   </ItemGroup>
