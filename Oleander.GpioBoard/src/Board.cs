@@ -59,10 +59,13 @@ public class Board
     private bool _pulseValue;
 
     private readonly GpioController _controller = new();
+    private readonly GasConsumptionReport _gasConsumptionReport;
 
     public Board()
     {
         this.Logger = LoggerFactory.CreateLogger<Board>();
+
+        this._gasConsumptionReport = new(this.Logger,  Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "reports"));
 
         this._inPin18 = new InputPin(this.Logger, 18);
         this._inPin19 = new InputPin(this.Logger, 19); // rot
@@ -121,8 +124,11 @@ public class Board
                 // LS WC
                 this._inPin20.ValueChanged += args =>
                 {
-                    // Dusche
+                    // Dusche ein?
                     if (this._controller.Read(this._inPin27.PinNumber) == PinValue.High) return;
+                    // WC-Tür offen?
+                    if (this._controller.Read(this._inPin23.PinNumber) == PinValue.Low) return;
+
                     // LK WC
                     //this._controller.Write(outPin06, args.ChangeType == PinEventTypes.Rising ? PinValue.High : PinValue.Low);
 
@@ -137,14 +143,24 @@ public class Board
                         this._controller.Write(outPin03, PinValue.Low);
 
                         // LK Boden / Keller
-                        this._controller.Write(outPin11, PinValue.Low);
+                        this._controller.Write(outPin10, PinValue.Low);
 
                         // WC-Beckern
-                        this._controller.Write(outPin10,  PinValue.High);
+                        this._controller.Write(outPin11,  PinValue.High);
 
-                        // LK WC ??
-                        this._controller.Write(outPin06, PinValue.High);
+                        // LK WC Zu
+                        this._controller.Write(outPin06, PinValue.Low);
+
+                        // 26V an
+                        this._controller.Write(outPin02, PinValue.Low);
+
                     }
+                    else
+                    {
+                        // LK WC ??
+                        //this._controller.Write(outPin06, PinValue.High);
+                    }
+
                     //this._controller.Write(outPin04, args.ChangeType == PinEventTypes.Rising ? PinValue.High : PinValue.Low);
 
                 };
@@ -152,8 +168,14 @@ public class Board
                 // Klo-Tür
                 this._inPin23.ValueChanged += args =>
                 {
+                    // Dusche ein?
+                    if (this._controller.Read(this._inPin27.PinNumber) == PinValue.High) return;
+
                     // Lüfter aus
                     this._controller.Write(outPin03, PinValue.High);
+
+                    // 26V aus
+                    this._controller.Write(outPin02, PinValue.High);
                 };
 
                 // Dusche
@@ -162,26 +184,33 @@ public class Board
                     // LS WC
                     if (this._controller.Read(this._inPin20.PinNumber) == PinValue.High) return;
 
-                    this._controller.Write(outPin03, args.ChangeType == PinEventTypes.Rising ? PinValue.High : PinValue.Low);
+                    // Lüfter
+                    this._controller.Write(outPin03, args.ChangeType == PinEventTypes.Rising ? PinValue.Low : PinValue.High);
+                    // 26V an/aus
+                    this._controller.Write(outPin02, args.ChangeType == PinEventTypes.Rising ? PinValue.Low : PinValue.High);
 
                     if (args.ChangeType == PinEventTypes.Rising)
                     {
 
                         // LK Boden / Keller
-                        this._controller.Write(outPin11, PinValue.High);
+                        this._controller.Write(outPin10, PinValue.High);
 
                         // WC-Beckern
-                        this._controller.Write(outPin10, PinValue.Low);
+                        this._controller.Write(outPin11, PinValue.Low);
 
-                        // LK WC ??
-                        this._controller.Write(outPin06, PinValue.High);
+                        // LK WC zu
+                        this._controller.Write(outPin06, PinValue.Low);
+
+                        // Dusche auf
+                        this._controller.Write(outPin12, PinValue.High);
+
+                        // Schlafzimmer zu
+                        this._controller.Write(outPin13, PinValue.Low);
+
+                        // Vorratskeller zu
+                        this._controller.Write(outPin14, PinValue.Low);
                     }
                 };
-
-
-
-
-
 
                 // Taster
                 this._inPin21.ValueChanged += args =>
@@ -194,10 +223,30 @@ public class Board
                     //this._controller.Write(outPin04, args.ChangeType == PinEventTypes.Rising ? PinValue.High : PinValue.Low);
                 };
 
+                // WC Spühung
+                this._inPin19.ValueChanged += args =>
+                {
+                    // Lüfter aus
+                    //this._controller.Write(outPin03, PinValue.High);
+
+                    // LK WC auf
+                    //this._controller.Write(outPin06, PinValue.High);
+                };
 
 
+                // Hauptgaszähler
+                this._inPin25.ValueChanged += args =>
+                {
+                    if (args.ChangeType == PinEventTypes.Falling) return;
+                    this._gasConsumptionReport.IncreaseMainGasMeter();
+                };
 
-
+                // Nebengaszähler
+                this._inPin26.ValueChanged += args =>
+                {
+                    if (args.ChangeType == PinEventTypes.Falling) return;
+                    this._gasConsumptionReport.IncreaseUnderGasMeter();
+                };
 
                 foreach (var inputPins in this._inputPins.Values)
                 {
@@ -262,6 +311,41 @@ public class Board
 
 
                 //}, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
+
+
+                this._puseTimer = new Timer(state =>
+                {
+                    try
+                    {
+                        var fileName = Path.Combine(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "exec"));
+
+                        if (File.Exists(fileName))
+                        {
+
+                            foreach (var line in File.ReadAllLines(fileName))
+                            {
+                                // 2=true
+                                var command = line.Split('=', StringSplitOptions.RemoveEmptyEntries);
+
+                                if (command.Length < 2) continue;
+
+                                if (!int.TryParse(command[0], out var pin)) continue;
+                                if (!bool.TryParse(command[1], out var pinState)) continue;
+                                if (pin is < 2 or > 17) continue;
+
+                                this._controller.Write(pin, pinState ? PinValue.High : PinValue.Low);
+                            }
+                            
+                            File.Delete(fileName);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        this.Logger.LogError("useTimer caused an exception! {ex}", ex.GetAllMessages());
+                    }
+
+
+                }, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
 
             }
             catch (Exception ex)

@@ -1,22 +1,29 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
-  <Import Project="..\..\.targets\common.targets" />
+  <Import Project="..\..\Common\targets\common.targets" />
 
   <PropertyGroup>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <Description>Oleander Oleander.GpioBoard</Description>
     <UserSecretsId>dotnet-Oleander.GpioBoard.WorkerService-c0c10f79-e89b-4c1f-8749-760be73cadb4</UserSecretsId>
     <ServerGarbageCollection>true</ServerGarbageCollection>
+    <AssemblyVersion>0.0.3.1</AssemblyVersion>
+    <SourceRevisionId>1cd1ba613ca579defd9e678a7e20516acfc9e5f2</SourceRevisionId>
+    <VersionSuffix>alpha</VersionSuffix>
+    <FileVersion>$(AssemblyVersion)</FileVersion>
+    <Version Condition="'$(VersionSuffix)' != ''">$(AssemblyVersion)-$(VersionSuffix)</Version>
+    <Version Condition="'$(VersionSuffix)' == ''">$(AssemblyVersion)</Version>
+    <InformationalVersion>$(AssemblyVersion)</InformationalVersion>
   </PropertyGroup>
 
-
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="7.0.0" />
-    <PackageReference Include="Oleander.Extensions.DependencyInjection" Version="1.0.23076.1407" />
-    <PackageReference Include="Oleander.Extensions.Logging.Console" Version="1.0.23076.1407" />
-    <PackageReference Include="Oleander.Extensions.Logging.File" Version="1.0.23076.1407" />
-    <PackageReference Include="Oleander.Extensions.Logging.TextFormatters" Version="1.0.23076.1407" />
-    <PackageReference Include="Oleander.Extensions.Logging.ZipFile" Version="1.0.23076.1407" />
+    <PackageReference Include="Oleander.Assembly.Versioning.BuildTask" Version="0.0.56.0-dev" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="8.0.0" />
+    <PackageReference Include="Oleander.Extensions.DependencyInjection" Version="1.1.23347.11357-dev" />
+    <PackageReference Include="Oleander.Extensions.Logging.Console" Version="1.1.23347.11357-dev" />
+    <PackageReference Include="Oleander.Extensions.Logging.File" Version="1.1.23347.11357-dev" />
+    <PackageReference Include="Oleander.Extensions.Logging.TextFormatters" Version="1.1.23347.11357-dev" />
+    <PackageReference Include="Oleander.Extensions.Logging.ZipFile" Version="1.1.23347.11357-dev" />
   </ItemGroup>
 
   <ItemGroup>
